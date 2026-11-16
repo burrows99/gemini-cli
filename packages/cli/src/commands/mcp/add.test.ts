@@ -107,6 +107,27 @@ describe('mcp add command', () => {
     );
   });
 
+  it('should keep "=" characters inside env var values', async () => {
+    await parser.parseAsync(
+      'add -e DATABASE_URL=postgres://localhost/db?sslmode=require -e TOKEN=dGVzdA== my-server /path/to/server',
+    );
+
+    expect(mockSetValue).toHaveBeenCalledWith(
+      SettingScope.Workspace,
+      'mcpServers',
+      {
+        'my-server': {
+          command: '/path/to/server',
+          args: [],
+          env: {
+            DATABASE_URL: 'postgres://localhost/db?sslmode=require',
+            TOKEN: 'dGVzdA==',
+          },
+        },
+      },
+    );
+  });
+
   it('should add an sse server to user settings', async () => {
     await parser.parseAsync(
       'add --transport sse --scope user -H "X-API-Key: your-key" sse-server https://example.com/sse-endpoint',
